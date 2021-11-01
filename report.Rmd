@@ -1,0 +1,159 @@
+---
+title: "Developing and Bringing a Portfolio Tail Risk Estimation Solution to Market"
+description: |
+    This report is a landscape review of the state of the art in value at risk modelling. We review and critique the latest financial econometrics and machine learning techniques in both industry and academia. Recommendations are provided in the context of future market opportunities for Fund Axis ltd.
+author:
+  - first_name: "Barry"
+    last_name: "Quinn"
+    url: https://quinference
+    affiliation: Queen's University Management School
+    affiliation_url: https://mgt.qub.ac.uk
+    orcid_id: 0000-0002-8637-9060
+  - name: "Fearghal Kearney"
+    url: https://sites.google.com/view/fkearney
+    affiliation: Queen's University Management School
+    affiliation_url: https://mgt.qub.ac.uk
+    orcid_id: 0000-0002-3251-8707
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    cold_folding: true
+    toc: true
+bibliography: references.bib
+nocite: '@*'
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warnings=FALSE)
+pacman::p_load(tidyverse,flextable,DT)
+```
+
+# Introduction
+
+## Firm Challenge
+
+Funds-Axis is a leading provider of investment compliance monitoring, risk and regulatory reporting solutions to the global investment management industry. They offer a unique combination of highly efficient and secure, multi-modular technology and expert regulatory support and service delivered through their cloud based platform.
+
+There is a growing regulatory push for investment managers to adopt more advanced quantitative risk solutions for the majority of investment funds, however, it is currently accepted within the investment management industry that Value-at-Risk (VaR) and Risk Analytics, despite their usefulness, are complex and expensive and cannot be made available for all investment funds at an accessible pricing point. Through this Innovation Voucher we hope to be able to challenge this. Funds-Axis' current platform does not offer a quantitative risk model solution, through this Innovation Voucher we aim to research a cutting-edge intellectually robust, scalable solution in the main areas of focus of Value-at-Risk and Risk Analytics. The demand for this solution is there from Funds-Axis' existing client base, and by developing a proprietary risk they will ensure that we are ready to meet client and wider sectoral needs.
+
+Funds-Axis strives to provide their customers with cost-effective best-of-breed regulatory technology, and recognises that in order to do so the company must innovate to ensure high levels of efficiency and automation in their products and services. The innovation to the company would lie in providing a bundled solution at scale at a new market price point. To achieve this, Funds-Axis need to be able to develop complex proprietary statistical modules and deploy them at scale using advanced cloud computing techniques. The skills required are a blend of leading edge quantitative financial, financial modelling, and statistical capabilities such as machine learning methods for risk modelling. The application of machine learning techniques in the context of risk measurement is an emerging and less developed area.
+
+By adding a risk solution to their portfolio, at a potentially market disrupting price point, will provide Funds-Axis further differentiation from the competition. The vision is that the developed solution would be routinely recognised as an accepted go-to solution for retail investment funds that require a Value-at-Risk solution for their regulatory reporting requirements.
+
+Funds-Axis would like to develop the capability to offer a bespoke Risk Analytics platform to their existing client base and to develop new product lines. Specifically, they would like to exploit the latest advances in financial machine learning and computer age statistical inference for:
+
+* Tail risk analytics and VaR modelling
+* Scenario risk analytics
+* Stress testing risk analytics
+
+Funds-Axis have considered out of the box products but have found them to be unsatisfactory and would like to develop predictive risk analytics capabilities by exploiting the latest innovations in financial analytics technologies and AI.
+
+## Industry Background
+The global investment management industry is worth approximately \$111 trillion, with c. 45\% in retail mutual funds. There are c. 125,000 mutual funds globally. Funds-Axis key focus is on c. \$20 trillion of these assets in c. 30,000 mutual funds in Europe. All of these require the Investment Compliance, Risk and Regulatory Reporting Solutions provided by Funds-Axis. The investment management industry currently restricts the use of Value-at-Risk (VaR) modelling and risk analytics to approx. 5-10\% of their portfolios as the associated costs are prohibitive. Pressure is mounting from global regulators for widespread use of advanced quantitative risk modelling across all investment portfolios, and as such, a rapid growth in demand for VaR and Risk Analytics over the next 5 years is expected. Funds-Axis' current platform does not offer a quantitative risk model solution; they recognise that in order to respond to existing clients and wider sectoral needs and demands, as well as remaining ahead of competitors, it is strategically important to expand the product portfolio to include VaR and Risk Analytics solutions. By developing a cutting-edge, intellectually robust, and scalable bundled Risk and VaR solution, suitable for approx. 90\% of portfolios at a new market price point, they know that significant commercial gains can be made, as they will be able to release a new premium bundled solution to their existing clients with immediate revenue returns.
+
+This Innovation Voucher will form a partnership that will explore and embed expertise in the latest risk analytics and financial machine learning (ML) research with a view to delivering a state-of-the-art risk and scenario analytics platform for Funds-Axis. This requires a combination of expertise in leading edge quantitative financial, financial modelling, and statistical capabilities such as ML methods for risk modelling; skills that Funds-Axis do not have in-house. Risk modelling is complex and requires specialist knowledge in financial ML, tail risk theory and regulation, and computer age statistical inference which can be provided by the Innovation Voucher team from Queen's University Belfast. ML is becoming an established tool in quantitative finance, however, in the context of risk measurement ML is a less developed area i.e. out-of-the-box ML algorithms which are routinely used in financial applications, perform poorly in risk modelling.
+
+The models that Funds-Axis seek to develop will ultimately be subject to intellectual challenge and therefore need to be comprehensive, robust, fit for purpose and academically sound so that they can withstand scrutiny. Partnering with academic experts, will ensure that this challenge will be met, and future seminars and publications to industry stakeholders will convince the community that the solution has been created using a robust and rigorous scientific approach.
+
+## Review off-the-shelf solutions
+In this section we seek to review existing VaR products on the market and a replication exercise to determine a risk performance baseline.  Approximately 5\% of the industry currently use VaR and Risk solutions. Currently VaR and Risk Analytics are only required by more complex investment portfolios (e.g. using leverage and derivatives etc.), therefore Risk and VaR analytics are typically provided at high cost and as part of an unbundled standalone service. Funds-Axis offer on request Risk and VaR to a small number of portfolios, which make up c. 5\% of the portfolios we manage. Direct competitors include: Bloomberg, FIS, MSCI Risk Metrics, Confluence Statpro and RiskSystems.
+
+# VaR Literature Review 
+
+The following string query results in 565 papers in 3 star plus finance journals where the key words included value at risk.
+
+```{r abstracts, code_folding=TRUE}
+refs<-read_csv("scopus_search_Var.csv")
+refs %>% select(Authors,Title,Year,`Source title`,Abstract) %>%
+  # flextable() %>% 
+  # autofit() %>%
+  # set_caption("Scopus search results for *Value-at-Risk* literature")
+  datatable(extensions = 'Buttons',
+  filter = 'top',caption="Scopus search results for `Value-at-Risk` literature",
+  options = list(
+    # dom = 'Bfrtip',
+    # buttons = c('copy', 'csv'),
+    # pageLength = 50,
+    lengthMenu =list(c(10, 50, 150, -1), c(10, 25, 50, "All"))
+  ))
+```
+
+## What is Value-at-Risk?
+The basic idea behind Value-at-Risk to investors of the worst-case outcome for their portfolios. A simplistic question an investor might ask is: "How much would I lose if I suffer an extreme negative shock?". This is generally calculated by focusing on the portfolio's return being in the extreme 5th or 1st percentile of the distribution. In such a circumstance the loss suffered is called the value-at-risk (VaR). VaR can be thought of as being a quantile of a distribution, as it is the portfolio loss associated with an extreme left tailed percentile of the return distribution. The quantile, $q$, of a particular distribution is the cut-off point below which $q$\% of the distribution's values lie. A common quantile that people are familiar with is the median, which is the value below which 50\% of the distribution's values lie. It can also be viewed from the opposing direction meaning that 50\% of the distribution's values lie above this median value also. When we calculate VaR we generally focus on a 1\% or 5\% Var, meaning that 99\% or 95\% of returns will be higher than the calculated VaR value and only 1\% or 5\% of the portfolio's returns will be worse than the VaR figure.
+
+Often VaR is illustrated by assuming a bell shaped normal distribution of portfolio returns. This is due to the ease of exposition when using a normal distribution of returns. In such a circumstance one can calculate VaR by using only the first two moments of the distribution, i.e., the mean and standard deviation. Firstly, we should sort the return values from high to low, and after doing so we can, use statistical tables to determine that a 1\% VaR value of for a standard normal distribution (i.e., mean=0, standard deviation=1) is equal to:
+
+\[\textit{$1\%-VaR$} = \mu - 2.33\sigma,\]
+
+where $\mu$ is equal to mean of the normally distributed portfolio returns, and $\sigma$ is their standard deviation.\\
+\subsection{What is Expected Shortfall?}
+Expected Shortfall is another leading measure of tail risk; a measure that is preferred by many practitioners in place of VaR. If we think back to the situation where we look at the 1\% worst-case of future portfolio returns, the VaR is the most optimistic scenario, as it provides you with the cut-off point below which all the worst-case returns lie. Essentially the VaR is the best case of the worst case outcomes. It does not provide the user with the magnitudes of the potential losses further out the tail. It is for this reason that Expected Shortfall (ES) (sometimes referred to as Conditional Tail Expectation (CTE)) is used. Instead of focusing on the quantile-based cut-off point the ES takes the average of the worst 1\% of returns. Again assuming normally distributed returns for simplicity, we follow Treussand (2007) ``The Non-monotonicity of Value-at-Risk and the Validity of Risk Measures over Different Horizons", and represent ES as:
+\[ES=\frac{1}{0.05} \exp(\mu)\textit{N}[-\sigma - \textit{F}(0.95)]-1.\]
+In the above equation, $\mu$ represents the mean of the continuously compounded returns, and $\sigma$ their standard deviation. $\textit{N}$ represents the standard normal distribution and $\textit{F}$ is its inverse.
+
+An issue that both VaR and ES face is that if they are often calculated based on historical returns only. This means that very few observations of worst case scenarios inform tail risk measures calculated, meaning that they can suffer from large estimation errors. 
+
+
+## Contemporary review of industry and academic literature of Value-at-Risk, AI and financial machine learning
+
+**further desktop exercise on the state of the art AI, machine learning, and high performance computing approaches to improve Value-at-Risk estimates**
+
+%#######################Back to recommendations harvested from KTP App -edited slightly#############################
+%Add VaR Lit Review based recommendations to the below
+\section{Possible options and recommendations for Risk Analytics}
+\textit{What is the route to market?}\\
+Funds-Axis have a straightforward route to market through their existing client base and are already aware via customer feedback that demand for this new product exists. They can use that as their route to market for the solution that this Innovation Voucher will create.
+
+As they hold the client data already, and the demand is there from an estimated 50\% of their existing clients to apply VaR models to their portfolios, this will enable them to release a new premium bundled solution which incorporates VaR and Risk Analytical with immediate revenue returns.
+
+The product could be initially marketed to existing clients. This could be through in-app marketing to customers where they will see the new modules and be able to trial it and also through CRM engagement which will commence at the appropriate point during the project.
+
+Funds-Axis could then move to look at new clients, including:
+Through RFPs where they are responding to client requests for information, which almost invariably include a VaR component.
+Through proactive marketing and co-ordinated campaign management, coupled with a dedicated sales effort.
+
+\textbf{What are the likely impacts of the project?}\\
+The Funds-Axis revenue model is to charge on a per portfolio per module per annum basis, with all deals being recurring annual revenue.
+
+Within the current revenue, they have c.1,000 portfolios which subscribe to modules worth between £1,000 and £2,500 per fund.
+
+VaR (plus back testing and stress testing) is a bespoke premium solution that typically prices at c. £2,750 - £3,500 per portfolio per annum. This is the price at which they resell 3rd party solutions to those of customers who want us to provide it.
+
+Whilst, it is not Funds-Axis' plan to push for a really low cost solution, price disruption is an element of what they are hoping to achieve. They assume they can make a risk solution available at £1,250 per portfolio per annum and may be able to push closer to £2,250. The figures below are based on the simple assumption that they can charge c. £1,250 per investment portfolio.
+
+They have factored in the following costs, which are the expected incremental costs and are in line with requirements for the existing solution:
+
+Incremental headcount to increase by 2 a year to increasing to 10 over 5 years and with average salaries of £50k.
+Datacosts £25k per annum
+Technology infrastructure costs - £25k per annum
+Other costs i.e. marketing costs, sales, other business development costs, provision for legal costs for any IP protection, potential 3rd party review/audit of the calculations etc., rising from £50k to £250k over the 5 years
+A. Premium VaR Solution -- this service be charged at (assumption) £1.25k per investment portfolio
+
+During project: 0
+
+Yr 1: No of Portfolios 200, income of £250k, costs c. £200k, net profit is 20\% = £50k net profit
+
+Yr 2: No of Portfolios 400, income of £500k, costs c. £350k, net profit is 30\% = £150k net profit
+
+Yr 3: No of Portfolios 600, income of £750k, costs c. £500k, net profit is 33.3\% = £250k net profit
+
+Yr 4: No of Portfolios 800, income of £1m, costs c. £650k, net profit is 35\% = £350k net profit
+
+Yr 5: No of Portfolios 1000, income of £1.25m, costs c. £800k, net profit is 36\% = £450k net profit
+
+\textbf{What additional business actions and investments will be needed for you to achieve the business case, beyond those needed to deliver the work plan?}\\
+In order to bring this solution to market the company will commit to the following costs:
+
+Data costs: They will need to incur significant data costs, including during the build phase. We anticipate these costs to be approximately £75,000 over 3 years.
+Technology infrastructure costs will be in the region of £25k per annum.
+Staff costs: They will need to develop a dedicated risk team. It is the intention of the company to create two new technical roles in this area, this would be two experienced professionals with salaries of approximately £50,000 per annum. An incremental headcount to increase by 10 over 5 years and with average costs of £50,000 is to be factored in.
+Development costs: In order to develop the commercialised solution it is anticipated that the development costs will be in the region of £150k.
+Funds-Axis will also need to invest in marketing, business development and sales to ensure that their existing clients are aware of the new offering and that they can attract new clients. Provision for IP and audit/accreditation costs have also been considered.
+
+
+<!-- <!-- # References --> -->
+
+<!-- <!-- <div id="refs"></div> --> -->
+
+<!-- # Appendix -->
