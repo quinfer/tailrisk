@@ -19,7 +19,7 @@ output:
   distill::distill_article:
     cold_folding: true
     toc: true
-bibliography: references.bib
+bibliography: ["references.bib"]
 nocite: '@*'
 ---
 
@@ -27,9 +27,9 @@ nocite: '@*'
 ```{r setup, include=FALSE}
 rms=ls()
 rm(list = rms)
-knitr::opts_chunk$set(message = FALSE,warnings=FALSE,cache = TRUE)
+knitr::opts_chunk$set(message = FALSE,warnings=FALSE)
 pacman::p_load(tidyverse,flextable,DT,bibliometrix,knitr,kableExtra)
-load("data/biblio_dat.RData")
+load("~/Dropbox/corporate/fundaxis/biblio_dat.RData")
 ```
 
 # Introduction
@@ -85,14 +85,14 @@ An issue that both VaR and ES face is that if they are often calculated based on
 
 Bibliometric methodology uses quantitative techniques on bibliometric data to extract emerging trends, collaborative patterns, research constituents and explore the intellectual structure of a specific domain in the extant literature. Unlike a systematic reviews and meta-analysis^[A systematic review can be domain, method or theory-based and is usually narrow in scope and more subjective in is descriptions.  Meta-analysis focuses on the across-study variation in the effect-size estimates and an exploration of contributing factors to this variation. Meta-analysis can also handle larger numbers of papers, though the literature may tend to be less diverse and subject to publication bias reducing the validity of the findings.], it tends to use large datasets and is objective in nature. 
 
-Broadly speaking, bibliometric methodology can be categorised into performance analysis (an objective approach to summarise papers) and science mapping (a subjective approach to extract themes and nuances using a established corpus of terms or words) [@donthu2021].  We use a bibliometric approach to consider the most important contributions to value-at-risk analysis in the past 20 years. 
+Broadly speaking, bibliometric methodology can be categorised into performance analysis (an objective approach to summarise papers) and science mapping (a subjective approach to extract themes and nuances using a established corpus of terms or words) [@Donthu.2021].  We use a bibliometric approach to consider the most important contributions to value-at-risk analysis in the past 20 years. 
 
 
 Our analysis follows a two stage process, In the first instance we cast the net wide and capture all research conducted in value at risk over many academic disciplines.  In the second stage we will subset this data to include only high quality journal articles according to the Chartered Association of Business Schools [CABS](https://charteredabs.org/) ranking system. 
 
 
 We begin by gathering raw data is gathered using the following wide boolean search in Scopus.
-```{bash}
+```
 TITLE-ABS-KEY("Value at Risk" OR "Value-at-Risk") AND ( LIMIT-TO ( EXACTKEYWORD,"Value At Risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-Risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-risk (VaR)" ) )
 ```
 This code search for the terms **value at risk**, **value-at-risk** and **VaR** in keywords, abstracts and titles. This search uncovers `r nrow(all_refs_distinct_doi)` articles. 
@@ -176,12 +176,12 @@ Figure \@ref(fig:prod-raw1) illustrates the annual trends in terms of subject ar
 all_sums$MostRelSources %>% kable(caption = "Most relevant jounral sources") %>% kable_paper()
 ```
 
-```{r}
+```{r code_folding=TRUE}
 plot(results_all,k=20,pause = FALSE)
 ```
 
 
-```{r topauth1, fig.cap="Top author productivity over time"}
+```{r topauth1, fig.cap="Top author productivity over time",code_folding=TRUE}
 topAU <- authorProdOverTime(bib_all,k=20, graph = TRUE)
 ```
 # Science mapping for broad scope bibliography
@@ -200,32 +200,40 @@ Table \@ref(tab:mostcite) using the total number of citations to determine the m
 
 We can extract thematic clusters in a research field by using a co-citation network. The clusters are derived on cited publications that occur together frequently in publication reference lists.
 
-```{r co-author1, fig.cap="Authors collaboration network"}
-library(ggrepel)
-netMatrix<-biblioNetwork(bib_all,analysis = "co-citation",network = "references")
-networkPlot(netMatrix,n=20,labelsize =0.5,Title="")
+```{r co-author1, fig.cap="Authors collaboration network",code_folding=TRUE}
+netMatrix<-biblioNetwork(bib_all,analysis = "collaboration",network = "authors")
+net<-networkPlot(netMatrix,n=20,labelsize =1.5,Title="",label.cex = T,normalize = "association",halo = T,type = "auto")
 ```
 
-Figure \@ref(fig:co-author1) shows a co-citation network with two distinct clusters. 
+Figure \@ref(fig:co-author1) shows a collaboration network with four distinct clusters. The size of the names are proportional to the level of collaboration of the author within that cluster.  The top 20 authors are plotted in of collaborations.
 
-
-
-```{r cooccur1, fig.cap="How does key words in VaR literature combine?"}
+```{r bibcoupling, fig.cap="Bibliographic coupling",code_folding=TRUE}
 # Create keyword co-occurrences network
-NetMatrix <- biblioNetwork(bib_all, analysis = "co-occurrences", network = "keywords", sep = ";")
+NetMatrix <- biblioNetwork(bib_all, analysis = "coupling", network = "references", sep = ";")
 # Plot the network
-net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "bibliographic coupling", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
 ```
 
+## Co-word analysis and clustering
+As the name suggests the unit of measure of co-word analysis is words, usually taking either titles, keywords or abstracts. A limitation of this approach is that words can have different meanings in different contexts, so we focus on keywords a the unit of measurement.  Combining a co-word analysis with a clustering at key intervals in the research field can reveal thematic maps at certain intervals over the research field's evolution[@Cobo.2011].
 
-# Thematic evolution as a function of Basel Accords
-
-Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.
 
 The following shows a evolution of the important themes in the CABS literature, split using key years in the Basel Accords.  Period 1999-2004 is Basel 1, Period 2004-2010 is Basel 2, and period 2010-2016 is Basel 3, while the final period can be thought of as Basel 3.5 or 4.
 
-```{r theme1, fig.cap="How does VaR research evolve through time?"}
-themes1$Net
+```{r theme1, fig.cap="Thematic cluster for BASEL I period", code_folding=TRUE}
+themes1$TM[[1]]$map
+```
+
+```{r theme2, fig.cap="Thematic cluster for BASEL II period", code_folding=TRUE}
+themes1$TM[[2]]$map
+```
+
+```{r theme3, fig.cap="Thematic cluster for BASEL III period", code_folding=TRUE}
+themes1$TM[[3]]$map
+```
+
+```{r theme4, fig.cap="Thematic cluster for BASEL IV period",code_folding=TRUE}
+themes1$TM[[4]]$map
 ```
 
 # High-quality finance and economic journal. 
@@ -245,6 +253,7 @@ cabs %>% select(Authors,Title,Year,`Source title`) %>%
     lengthMenu =list(c(10, 50, 150, -1), c(10, 25, 50, "All"))
   ))
 ```
+
 ## Performance analysis
 
 The citation data incorporates papers published between 1996 and 2021 inclusive. It comprises 574 documents spanning 41 journals, books and conferences. The most cited article is by R. Tyrell Rockafellar of the University of Washington and Stansilav Uryasev of the University of Florida published in the Journal of Banking & Finance in 2002. It focuses on conditional value-at-risk for general loss distributions as often appear in finance due to finite sampling. It highlights the advantages of conditional value-at-risk (CVaR) over conventional value-at-risk. It yields the same results as VaR in settings where normal distributions apply. However, this is rarely the case in practice with empirical finance problems due to the fat tails of asset returns. In situations such as this the advantages of cVaR include numerical efficiency and stability of large-scale calculations brought about through optimization refinements. Crucially, the approach is also lauded for being coherent.
@@ -253,72 +262,42 @@ Of the top ten manuscripts with the largest number of citations in our VaR sampl
 
 Overall, the power of collaboration can be seem with an average fo 2.37 co-authors per tail-risk document identified. There is a very large increase in the number of articles produced per year over the 1996 to 2021 period. In 1996 only 2 articles are produced, however by 2021 it is 38 articles (even prior to the year end). This equates to an annual growth rate of 12.49%. Some of the most productive authors in the space include Danelsson, Chen, Fabozzi, Su, Fantazzini and Hardle Interestingly, an Irish academic, Professor John Cotter from UCD, appears as one of the top ten most productive authors, with 2.0 fractionalized articles.
 
-```{r}
+```{r code_folding=TRUE}
 plot(results_cabs,k=10,pause = FALSE)
 ```
+
 Despite the number of articles being published in the space significantly increasing during the 1996-2021 period, overall academic interest (as measured by average total citations per year) appears to have piqued in the 2000-2003 period and broadly declined ever since. A high of roughly 250 average total citations was registered in 2002 with a drop to less than 10 in the final years of the sample period.
-```{r, fig.cap="Author dominance ranking"}
+
+```{r, fig.cap="Author dominance ranking",code_folding=TRUE}
 DF <- dominance(results_cabs, k = 10)
 DF %>% kable() %>% kable_paper()
 ```
+
 Again some of the same leading academic contributors in this area can be seen from the above dominance ranking table. The reader should note however that many academic articles in finance are submitted with author ordering based on alphabetic ranking of the academic's surnames. For this reason the First-Authored ranking may be biased towards individuals with surnames that appear early in alphabetical ordering, with examples from the table including Ardia, Chen, Danelsson and Degiannakis. Furthermore, there has been general trend over time in finance publications to increase the number of authors on any given article. Therefore, you might expect more recent articles to be more biased towards being multi-authored as opposed to single-authored.
-```{r fig.cap="Top author productivity over time"}
+
+```{r fig.cap="Top author productivity over time",code_folding=TRUE}
 topAU <- authorProdOverTime(bib_cabs, k = 10, graph = TRUE)
 ```
+
 The above plot provides us with an overview of the productivity of the top authors in this space over time. Some interesting dynamics feature, with for instance, Danelsson not registering publications post 2014, and the majority of their citations appearing in the early years of their publication history. Uryasev's publication history in this space spans a long period of time with publications in the year 2000 up to 2021. Authors who have began to publish in this space more recently include Ardia, Chen, Su and Hardle. Chen in particular has been very successful in attractive citations over a short period of time.
 
-# Thematic analysis
+# Thematic keyword and cluster analysis
 
-## Keyword co-occurence network
-
-```{r code_folding=TRUE}
-library(igraph)
-(co_occur_cabs$graph
-```
-FK comment: not too much we can really say for country collaboration here.
-In terms of academic collaborations across countries, we see USA, China and the United Kingdom appearing as main parties for collaboration. This is primarily driven by the large number of total publications from authors in those countries. Well developed countries appear on the collaborations map more regularly than less well developed regions.
-
-Following the approaches of Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017) a bibliographic network based on keywords is produced. The graph indicates the co-occurence of keywords. What we observe is split into two distinct clusters. One dynamic in the clusters surrounds keyword co-occurrence of value-at-risk with commodity finance terms such as, crude oil, energy market, oil supply, energy markets, and commodity price. Another dynamic observed is the co-occurrence of value-at-risk with statistical methodologies such as numerical model, forecasting method, and to a lesser extent estimation methods, estimation, optimization, monte carlo methods, regression analysis and computer simulation.
-
-## Co-word analysis
-The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
-
-The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA).
-
-Here, we show an example using the function conceptualStructure that performs a CA or MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
-
-*conceptualStructure* includes natural language processing (NLP) routines (see the function termExtraction) to extract terms from titles and abstracts. In addition, it implements the Porter’s stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
-
-```{r code_folding=TRUE,include=FALSE}
-CS_cabs
-
-```
-FK Comment: Me naively trying to interpret the conceptualstructure output doesn't yield anything radically different from my silly description of dynamics in the keyword co-occurrences network plot above. The graphs look cool but I'm not sure how we can describe them - maybe if we moved them to a lower resolution, reduced the number of nodes/keywords etc we might be able to make something more out.s
-
-## Historical Direct Citation Network
-
-The historiographic map is a graph proposed by E. Garfield (2004) to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
-
-Garfield, E. (2004). Historiographic mapping of knowledge domains literature. Journal of Information Science, 30(2), 119-145.
-
-The function generates a chronological direct citation network matrix which can be plotted using histPlot:
-
-```{r, eval=FALSE}
-hist_cabs
+```{r code_folding=TRUE,fig.cap="Basel I period,code_folding=TRUE"}
+themes2$TM[[1]]$map
 ```
 
 
-FK Comment: I need to study the above plot and legend a lot more before I could say much about them. Does it mean that people are likely to cite both Mi 2017 and Huang 2015 together and then others would cite Rocco 2014 or Mgel 2018 in combo with one another. That there is clustering in terms of the co-occurrence of article citations in papers? I could we well wide of the mark here.
+```{r code_folding=TRUE,fig.cap="Basel II period",code_folding=TRUE}
+themes2$TM[[2]]$map
+```
 
-## Thematic evolution as a function of Basel Accords
+```{r code_folding=TRUE,fig.cap="Basel III period",code_folding=TRUE}
+themes2$TM[[3]]$map
+```
 
-Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.
-
-The following shows a evolution of the important themes in the CABS literature, split using key years in the Basel Accords.  Period 1999-2004 is Basel 1, Period 2004-2010 is Basel 2, and period 2010-2016 is Basel 3, while the final period can be thought of as Basel 3.5 or 4.
-
-
-```{r}
-themes
+```{r code_folding=TRUE, fig.cap="Basel IV period",code_folding=TRUE}
+themes2$TM[[4]]$map
 ```
 
 
@@ -380,9 +359,3 @@ Staff costs: They will need to develop a dedicated risk team. It is the intentio
 Development costs: In order to develop the commercialised solution it is anticipated that the development costs will be in the region of £150k.
 Funds-Axis will also need to invest in marketing, business development and sales to ensure that their existing clients are aware of the new offering and that they can attract new clients. Provision for IP and audit/accreditation costs have also been considered.
 
-
-<!-- <!-- # References --> -->
-
-<!-- <!-- <div id="refs"></div> --> -->
-
-<!-- # Appendix -->
