@@ -1,0 +1,388 @@
+---
+title: "Developing and Bringing a Portfolio Tail Risk Estimation Solution to Market"
+description: |
+    This report is a landscape review of the state of the art in value at risk modelling. We review and critique the latest financial econometrics and machine learning techniques in both industry and academia. Recommendations are provided in the context of future market opportunities for Fund Axis ltd.
+author:
+  - first_name: "Barry"
+    last_name: "Quinn"
+    url: https://quinference
+    affiliation: Queen's University Management School
+    affiliation_url: https://mgt.qub.ac.uk
+    orcid_id: 0000-0002-8637-9060
+  - name: "Fearghal Kearney"
+    url: https://www.fkearney.ie
+    affiliation: Queen's Management School
+    affiliation_url: https://mgt.qub.ac.uk
+    orcid_id: 0000-0002-3251-8707
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    cold_folding: true
+    toc: true
+bibliography: references.bib
+nocite: '@*'
+---
+
+
+```{r setup, include=FALSE}
+rms=ls()
+rm(list = rms)
+knitr::opts_chunk$set(message = FALSE,warnings=FALSE,cache = TRUE)
+pacman::p_load(tidyverse,flextable,DT,bibliometrix,knitr,kableExtra)
+load("data/biblio_dat.RData")
+```
+
+# Introduction
+
+## Firm Challenge
+
+Funds-Axis is a leading provider of investment compliance monitoring, risk and regulatory reporting solutions to the global investment management industry. They offer a unique combination of highly efficient and secure, multi-modular technology and expert regulatory support and service delivered through their cloud based platform.
+
+There is a growing regulatory push for investment managers to adopt more advanced quantitative risk solutions for the majority of investment funds, however, it is currently accepted within the investment management industry that Value-at-Risk (VaR) and Risk Analytics, despite their usefulness, are complex and expensive and cannot be made available for all investment funds at an accessible pricing point. Through this Innovation Voucher we hope to be able to challenge this. Funds-Axis' current platform does not offer a quantitative risk model solution, through this Innovation Voucher we aim to research a cutting-edge intellectually robust, scalable solution in the main areas of focus of Value-at-Risk and Risk Analytics. The demand for this solution is there from Funds-Axis' existing client base, and by developing a proprietary risk they will ensure that we are ready to meet client and wider sectoral needs.
+
+Funds-Axis strives to provide their customers with cost-effective best-of-breed regulatory technology, and recognises that in order to do so the company must innovate to ensure high levels of efficiency and automation in their products and services. The innovation to the company would lie in providing a bundled solution at scale at a new market price point. To achieve this, Funds-Axis need to be able to develop complex proprietary statistical modules and deploy them at scale using advanced cloud computing techniques. The skills required are a blend of leading edge quantitative financial, financial modelling, and statistical capabilities such as machine learning methods for risk modelling. The application of machine learning techniques in the context of risk measurement is an emerging and less developed area.
+
+By adding a risk solution to their portfolio, at a potentially market disrupting price point, will provide Funds-Axis further differentiation from the competition. The vision is that the developed solution would be routinely recognised as an accepted go-to solution for retail investment funds that require a Value-at-Risk solution for their regulatory reporting requirements.
+
+Funds-Axis would like to develop the capability to offer a bespoke Risk Analytics platform to their existing client base and to develop new product lines. Specifically, they would like to exploit the latest advances in financial machine learning and computer age statistical inference for:
+
+* Tail risk analytics and VaR modelling
+* Scenario risk analytics
+* Stress testing risk analytics
+
+Funds-Axis have considered out of the box products but have found them to be unsatisfactory and would like to develop predictive risk analytics capabilities by exploiting the latest innovations in financial analytics technologies and AI.
+
+## Industry Background
+The global investment management industry is worth approximately \$111 trillion, with c. 45% in retail mutual funds. There are c. 125,000 mutual funds globally. Funds-Axis key focus is on c. \$20 trillion of these assets in c. 30,000 mutual funds in Europe. All of these require the Investment Compliance, Risk and Regulatory Reporting Solutions provided by Funds-Axis. The investment management industry currently restricts the use of Value-at-Risk (VaR) modelling and risk analytics to approx. 5-10% of their portfolios as the associated costs are prohibitive. Pressure is mounting from global regulators for widespread use of advanced quantitative risk modelling across all investment portfolios, and as such, a rapid growth in demand for VaR and Risk Analytics over the next 5 years is expected. Funds-Axis' current platform does not offer a quantitative risk model solution; they recognise that in order to respond to existing clients and wider sectoral needs and demands, as well as remaining ahead of competitors, it is strategically important to expand the product portfolio to include VaR and Risk Analytics solutions. By developing a cutting-edge, intellectually robust, and scalable bundled Risk and VaR solution, suitable for approx. 90% of portfolios at a new market price point, they know that significant commercial gains can be made, as they will be able to release a new premium bundled solution to their existing clients with immediate revenue returns.
+
+This Innovation Voucher will form a partnership that will explore and embed expertise in the latest risk analytics and financial machine learning (ML) research with a view to delivering a state-of-the-art risk and scenario analytics platform for Funds-Axis. This requires a combination of expertise in leading edge quantitative financial, financial modelling, and statistical capabilities such as ML methods for risk modelling; skills that Funds-Axis do not have in-house. Risk modelling is complex and requires specialist knowledge in financial ML, tail risk theory and regulation, and computer age statistical inference which can be provided by the Innovation Voucher team from Queen's University Belfast. ML is becoming an established tool in quantitative finance, however, in the context of risk measurement ML is a less developed area i.e. out-of-the-box ML algorithms which are routinely used in financial applications, perform poorly in risk modelling.
+
+The models that Funds-Axis seek to develop will ultimately be subject to intellectual challenge and therefore need to be comprehensive, robust, fit for purpose and academically sound so that they can withstand scrutiny. Partnering with academic experts, will ensure that this challenge will be met, and future seminars and publications to industry stakeholders will convince the community that the solution has been created using a robust and rigorous scientific approach.
+
+## Review off-the-shelf solutions
+In this section we seek to review existing VaR products on the market and a replication exercise to determine a risk performance baseline.  Approximately 5% of the industry currently use VaR and Risk solutions. Currently VaR and Risk Analytics are only required by more complex investment portfolios (e.g. using leverage and derivatives etc.), therefore Risk and VaR analytics are typically provided at high cost and as part of an unbundled standalone service. Funds-Axis offer on request Risk and VaR to a small number of portfolios, which make up c. 5% of the portfolios we manage. Direct competitors include: Bloomberg, FIS, MSCI Risk Metrics, Confluence Statpro and RiskSystems.
+
+# VaR Literature Review 
+
+## What is Value-at-Risk?
+The basic idea behind Value-at-Risk to investors of the worst-case outcome for their portfolios. A simplistic question an investor might ask is: "How much would I lose if I suffer an extreme negative shock?". This is generally calculated by focusing on the portfolio's return being in the extreme 5th or 1st percentile of the distribution. In such a circumstance the loss suffered is called the value-at-risk (VaR). VaR can be thought of as being a quantile of a distribution, as it is the portfolio loss associated with an extreme left tailed percentile of the return distribution. The quantile, $q$, of a particular distribution is the cut-off point below which $q$% of the distribution's values lie. A common quantile that people are familiar with is the median, which is the value below which 50% of the distribution's values lie. It can also be viewed from the opposing direction meaning that 50% of the distribution's values lie above this median value also. When we calculate VaR we generally focus on a 1% or 5% Var, meaning that 99% or 95% of returns will be higher than the calculated VaR value and only 1% or 5% of the portfolio's returns will be worse than the VaR figure.
+
+Often VaR is illustrated by assuming a bell shaped normal distribution of portfolio returns. This is due to the ease of exposition when using a normal distribution of returns. In such a circumstance one can calculate VaR by using only the first two moments of the distribution, i.e., the mean and standard deviation. Firstly, we should sort the return values from high to low, and after doing so we can, use statistical tables to determine that a 1% VaR value of for a standard normal distribution (i.e., mean=0, standard deviation=1) is equal to:
+
+$$\text{1%-VaR} = \mu - 2.33\sigma,$$
+
+where $\mu$ is equal to mean of the normally distributed portfolio returns, and $\sigma$ is their standard deviation.
+
+## What is Expected Shortfall?
+Expected Shortfall is another leading measure of tail risk; a measure that is preferred by many practitioners in place of VaR. If we think back to the situation where we look at the 1\% worst-case of future portfolio returns, the VaR is the most optimistic scenario, as it provides you with the cut-off point below which all the worst-case returns lie. Essentially the VaR is the best case of the worst case outcomes. It does not provide the user with the magnitudes of the potential losses further out the tail. It is for this reason that Expected Shortfall (ES) (sometimes referred to as Conditional Tail Expectation (CTE)) is used. Instead of focusing on the quantile-based cut-off point the ES takes the average of the worst 1\% of returns. Again assuming normally distributed returns for simplicity, we follow Treussand (2007) ``The Non-monotonicity of Value-at-Risk and the Validity of Risk Measures over Different Horizons", and represent ES as:
+$$ES=\frac{1}{0.05} \exp(\mu)\textit{N}[-\sigma - \textit{F}(0.95)]-1.$$
+In the above equation, $\mu$ represents the mean of the continuously compounded returns, and $\sigma$ their standard deviation. $\text{N}$ represents the standard normal distribution and $\text{F}$ is its inverse.
+
+An issue that both VaR and ES face is that if they are often calculated based on historical returns only. This means that very few observations of worst case scenarios inform tail risk measures calculated, meaning that they can suffer from large estimation errors. 
+
+
+# Bibliometric analysis
+
+Bibliometric methodology uses quantitative techniques on bibliometric data to extract emerging trends, collaborative patterns, research constituents and explore the intellectual structure of a specific domain in the extant literature. Unlike a systematic reviews and meta-analysis^[A systematic review can be domain, method or theory-based and is usually narrow in scope and more subjective in is descriptions.  Meta-analysis focuses on the across-study variation in the effect-size estimates and an exploration of contributing factors to this variation. Meta-analysis can also handle larger numbers of papers, though the literature may tend to be less diverse and subject to publication bias reducing the validity of the findings.], it tends to use large datasets and is objective in nature. 
+
+Broadly speaking, bibliometric methodology can be categorised into performance analysis (an objective approach to summarise papers) and science mapping (a subjective approach to extract themes and nuances using a established corpus of terms or words) [@donthu2021].  We use a bibliometric approach to consider the most important contributions to value-at-risk analysis in the past 20 years. 
+
+
+Our analysis follows a two stage process, In the first instance we cast the net wide and capture all research conducted in value at risk over many academic disciplines.  In the second stage we will subset this data to include only high quality journal articles according to the Chartered Association of Business Schools [CABS](https://charteredabs.org/) ranking system. 
+
+
+We begin by gathering raw data is gathered using the following wide boolean search in Scopus.
+```{bash}
+TITLE-ABS-KEY("Value at Risk" OR "Value-at-Risk") AND ( LIMIT-TO ( EXACTKEYWORD,"Value At Risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-Risk" ) OR LIMIT-TO ( EXACTKEYWORD,"Value-at-risk (VaR)" ) )
+```
+This code search for the terms **value at risk**, **value-at-risk** and **VaR** in keywords, abstracts and titles. This search uncovers `r nrow(all_refs_distinct_doi)` articles. 
+
+```{r alldata, code_folding=TRUE}
+all_refs_distinct_title %>% 
+  select(Authors,Title,Year,`Source title`) %>%
+  datatable(extensions = 'Buttons',
+  caption="Scopus search results for `Value-at-Risk` literature",
+   filter = list(position = 'top', clear = FALSE),
+  options = list(
+    search = list(regex = TRUE, caseInsensitive = FALSE, search = 'M[ae]'),
+    buttons = c('copy', 'csv'),
+    pageLength = 5,
+    lengthMenu =list(c(10, 50, 150, -1), c(10, 25, 50, "All"))
+  ))
+```
+Table \@ref(tab:alldata) documents this raw bibliographic data in terms of some of the most salient research constituents. The data is filter by date with the most recent publications at the top.
+
+# Performance analysis of broad-scope bibliograph
+
+Performance analysis provides a descriptive overview how research constituents (e.g. authors, institutions, countries and journals) contribute to a field and can be found in most review of academic literature. 
+
+```{r prod-raw, code_folding=TRUE, fig.cap="Articles over the period"}
+bind_rows(
+  all_sums$AnnualProduction %>% 
+    as_tibble() %>%
+    setNames(nm=c("Year","Articles"))
+  %>% mutate(Source="All"),
+  cabs_sums$AnnualProduction %>% 
+    as_tibble() %>%
+    setNames(nm=c("Year","Articles")) %>%
+    mutate(Source="CABS")
+  ) %>% ggplot(aes(y=Articles,x=Year,fill=Source)) + 
+  geom_col(position = "dodge") +
+  geom_text(aes(label = Articles),size=3,vjust=-0.25) +
+  scale_fill_brewer(type = "qual") +
+  labs(x="",y="Publications") +
+  # geom_line(colour="blue") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45),legend.position = "top")
+```
+
+Figure \@ref(fig:prod-raw) illustrates the annual production of VaR research for all academic outlets^[This includes published articles (1986), book Chapters (50), conference papers(452), reviews (28), and editorials (2)] and the sub-sample of high-ranking CABS journals. The trend in VaR articles steadily grow over the early period with a large jump following the 2007-2009 financial crisis; when VaR modelling came under intense scrutiny for their failure to capture and predict this shock. Post-crisis the trend has largely increased as risk management has become more highly debated in both academia and industry. The trends in all publications are closely march by the trends in the high-quality journals, with a doubling of production between 2008 and 2009.  Notably, there is a slight fall in 2021, possible due to the increase in academic research around COVID's economic implications.
+
+```{r prod-raw1, code_folding=TRUE, fig.cap="Articles over the period"}
+bind_rows(
+  efbm_sums$AnnualProduction %>% 
+    as_tibble() %>%
+    setNames(nm=c("Year","Articles"))
+  %>% mutate(Source="Econ Fin Biz and Mgt"),
+  csmath_sums$AnnualProduction %>% 
+    as_tibble() %>%
+    setNames(nm=c("Year","Articles")) %>%
+    mutate(Source="Computer Science and Maths"),
+  other_sums$AnnualProduction %>% 
+    as_tibble() %>%
+    setNames(nm=c("Year","Articles")) %>%
+    mutate(Source="Others")
+  ) %>% group_by(Year,Source) %>%
+  summarise(freq = Articles) %>%
+  ungroup() %>%
+  mutate(total = sum(freq), 
+         prop = freq/total) %>%
+  ggplot(aes(y=prop,x=Year,group=Source)) -> g 
+
+  g + geom_col(aes(fill=Source),position = "fill")  +
+  geom_text(aes(label = freq),size=3,position = position_fill(vjust = .5)) +
+  scale_fill_brewer(type = "qual") +
+  labs(x="",y="Publications") +
+  # geom_line(colour="blue") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45),legend.position = "top")
+```
+
+Figure \@ref(fig:prod-raw1) illustrates the annual trends in terms of subject areas.  A salient feature of these trends in the move towards more complex solutions to tail risk analysis post-crisis. The proportion of publications in 2009 seen a sharp increase in the area of computer science and maths. One reason may be a direct results of the abstract failure of the using of classical approaches which predicate the use of spherical error models and Gaussian distributions. Furthermore, advancements in machine learning techniques and computation power have facilitated an evolution in statistical inference in risk analytics which seems to have become more mainstream post-crisis VaR academic literature.
+
+## Research constituents' performance
+
+```{r code_folding=TRUE}
+all_sums$MostRelSources %>% kable(caption = "Most relevant jounral sources") %>% kable_paper()
+```
+
+```{r}
+plot(results_all,k=20,pause = FALSE)
+```
+
+
+```{r topauth1, fig.cap="Top author productivity over time"}
+topAU <- authorProdOverTime(bib_all,k=20, graph = TRUE)
+```
+# Science mapping for broad scope bibliography
+
+While performance analysis summarises the research output and its constituents, science mapping investigates the relationships between research constituents. The focus is on the intellectual infrastructure among constituents and includes citation and co-citation analysis, bibliographic coupling, co-word analysis, and co-authorship analysis. 
+
+## Citation analytics
+
+A key assumption in science mapping using citations is that cited a paper reflects a intellectual linkages.  A key limitation of this assumption is that it penalise more recent work and can be bias by highly networked academics.  That said, citations can uncover seminal publication and knowledge foundations.
+
+```{r mostcite, code_folding=TRUE}
+all_sums$MostCitedPapers %>% kable(caption = "Most citied authors") %>% kable_paper()
+```
+
+Table \@ref(tab:mostcite) using the total number of citations to determine the most influential publication in the broad literature on VaR. [@Rockerfellar2002] dominates the literature with a total of 2035 citations, averaging 101.75 citations per year since 1996. [@McNeil2006] comes in a distance second with 801 citations (annual average of 36).  
+
+We can extract thematic clusters in a research field by using a co-citation network. The clusters are derived on cited publications that occur together frequently in publication reference lists.
+
+```{r co-author1, fig.cap="Authors collaboration network"}
+library(ggrepel)
+netMatrix<-biblioNetwork(bib_all,analysis = "co-citation",network = "references")
+networkPlot(netMatrix,n=20,labelsize =0.5,Title="")
+```
+
+Figure \@ref(fig:co-author1) shows a co-citation network with two distinct clusters. 
+
+
+
+```{r cooccur1, fig.cap="How does key words in VaR literature combine?"}
+# Create keyword co-occurrences network
+NetMatrix <- biblioNetwork(bib_all, analysis = "co-occurrences", network = "keywords", sep = ";")
+# Plot the network
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
+```
+
+
+# Thematic evolution as a function of Basel Accords
+
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.
+
+The following shows a evolution of the important themes in the CABS literature, split using key years in the Basel Accords.  Period 1999-2004 is Basel 1, Period 2004-2010 is Basel 2, and period 2010-2016 is Basel 3, while the final period can be thought of as Basel 3.5 or 4.
+
+```{r theme1, fig.cap="How does VaR research evolve through time?"}
+themes1$Net
+```
+
+# High-quality finance and economic journal. 
+
+In this section we contrast the complete corpus of academic output on value at risk research to a sub-set of high-quality output as ranked by the CABS.
+
+
+```{r abstracts, code_folding=TRUE}
+cabs %>% select(Authors,Title,Year,`Source title`) %>%
+   datatable(extensions = 'Buttons',
+  caption="Scopus search results for `Value-at-Risk` literature",
+   filter = list(position = 'top', clear = FALSE),
+  options = list(
+    search = list(regex = TRUE, caseInsensitive = FALSE, search = 'M[ae]'),
+    buttons = c('copy', 'csv'),
+    pageLength = 5,
+    lengthMenu =list(c(10, 50, 150, -1), c(10, 25, 50, "All"))
+  ))
+```
+## Performance analysis
+
+The citation data incorporates papers published between 1996 and 2021 inclusive. It comprises 574 documents spanning 41 journals, books and conferences. The most cited article is by R. Tyrell Rockafellar of the University of Washington and Stansilav Uryasev of the University of Florida published in the Journal of Banking & Finance in 2002. It focuses on conditional value-at-risk for general loss distributions as often appear in finance due to finite sampling. It highlights the advantages of conditional value-at-risk (CVaR) over conventional value-at-risk. It yields the same results as VaR in settings where normal distributions apply. However, this is rarely the case in practice with empirical finance problems due to the fat tails of asset returns. In situations such as this the advantages of cVaR include numerical efficiency and stability of large-scale calculations brought about through optimization refinements. Crucially, the approach is also lauded for being coherent.
+
+Of the top ten manuscripts with the largest number of citations in our VaR sample five of them were published in the Journal of Banking & Finance, an ABS 3 ranked journal. As one might expect the top cited articles are mainly articles from earlier in our sample, with nine of the ten papers from 2006 and prior. This is natural as it takes a significant passing of time for articles to gain traction in the literature. Another leading outlet publishing such work in finance include Journal of Empirical Finance, with two of the top ten most cited articles. US and UK based corresponding authors boast the largest number of publications in this area, at 88 and 59 articles, respectively. However, despite a lower number of articles in total, Italian and Swiss based authors achieve the second and third most citations after US based authors.
+
+Overall, the power of collaboration can be seem with an average fo 2.37 co-authors per tail-risk document identified. There is a very large increase in the number of articles produced per year over the 1996 to 2021 period. In 1996 only 2 articles are produced, however by 2021 it is 38 articles (even prior to the year end). This equates to an annual growth rate of 12.49%. Some of the most productive authors in the space include Danelsson, Chen, Fabozzi, Su, Fantazzini and Hardle Interestingly, an Irish academic, Professor John Cotter from UCD, appears as one of the top ten most productive authors, with 2.0 fractionalized articles.
+
+```{r}
+plot(results_cabs,k=10,pause = FALSE)
+```
+Despite the number of articles being published in the space significantly increasing during the 1996-2021 period, overall academic interest (as measured by average total citations per year) appears to have piqued in the 2000-2003 period and broadly declined ever since. A high of roughly 250 average total citations was registered in 2002 with a drop to less than 10 in the final years of the sample period.
+```{r, fig.cap="Author dominance ranking"}
+DF <- dominance(results_cabs, k = 10)
+DF %>% kable() %>% kable_paper()
+```
+Again some of the same leading academic contributors in this area can be seen from the above dominance ranking table. The reader should note however that many academic articles in finance are submitted with author ordering based on alphabetic ranking of the academic's surnames. For this reason the First-Authored ranking may be biased towards individuals with surnames that appear early in alphabetical ordering, with examples from the table including Ardia, Chen, Danelsson and Degiannakis. Furthermore, there has been general trend over time in finance publications to increase the number of authors on any given article. Therefore, you might expect more recent articles to be more biased towards being multi-authored as opposed to single-authored.
+```{r fig.cap="Top author productivity over time"}
+topAU <- authorProdOverTime(bib_cabs, k = 10, graph = TRUE)
+```
+The above plot provides us with an overview of the productivity of the top authors in this space over time. Some interesting dynamics feature, with for instance, Danelsson not registering publications post 2014, and the majority of their citations appearing in the early years of their publication history. Uryasev's publication history in this space spans a long period of time with publications in the year 2000 up to 2021. Authors who have began to publish in this space more recently include Ardia, Chen, Su and Hardle. Chen in particular has been very successful in attractive citations over a short period of time.
+
+# Thematic analysis
+
+## Keyword co-occurence network
+
+```{r code_folding=TRUE}
+library(igraph)
+(co_occur_cabs$graph
+```
+FK comment: not too much we can really say for country collaboration here.
+In terms of academic collaborations across countries, we see USA, China and the United Kingdom appearing as main parties for collaboration. This is primarily driven by the large number of total publications from authors in those countries. Well developed countries appear on the collaborations map more regularly than less well developed regions.
+
+Following the approaches of Batagelj & Cerinsek (2013) and Aria & cuccurullo (2017) a bibliographic network based on keywords is produced. The graph indicates the co-occurence of keywords. What we observe is split into two distinct clusters. One dynamic in the clusters surrounds keyword co-occurrence of value-at-risk with commodity finance terms such as, crude oil, energy market, oil supply, energy markets, and commodity price. Another dynamic observed is the co-occurrence of value-at-risk with statistical methodologies such as numerical model, forecasting method, and to a lesser extent estimation methods, estimation, optimization, monte carlo methods, regression analysis and computer simulation.
+
+## Co-word analysis
+The aim of the co-word analysis is to map the conceptual structure of a framework using the word co-occurrences in a bibliographic collection.
+
+The analysis can be performed through dimensionality reduction techniques such as Multidimensional Scaling (MDS), Correspondence Analysis (CA) or Multiple Correspondence Analysis (MCA).
+
+Here, we show an example using the function conceptualStructure that performs a CA or MCA to draw a conceptual structure of the field and K-means clustering to identify clusters of documents which express common concepts. Results are plotted on a two-dimensional map.
+
+*conceptualStructure* includes natural language processing (NLP) routines (see the function termExtraction) to extract terms from titles and abstracts. In addition, it implements the Porter’s stemming algorithm to reduce inflected (or sometimes derived) words to their word stem, base or root form.
+
+```{r code_folding=TRUE,include=FALSE}
+CS_cabs
+
+```
+FK Comment: Me naively trying to interpret the conceptualstructure output doesn't yield anything radically different from my silly description of dynamics in the keyword co-occurrences network plot above. The graphs look cool but I'm not sure how we can describe them - maybe if we moved them to a lower resolution, reduced the number of nodes/keywords etc we might be able to make something more out.s
+
+## Historical Direct Citation Network
+
+The historiographic map is a graph proposed by E. Garfield (2004) to represent a chronological network map of most relevant direct citations resulting from a bibliographic collection.
+
+Garfield, E. (2004). Historiographic mapping of knowledge domains literature. Journal of Information Science, 30(2), 119-145.
+
+The function generates a chronological direct citation network matrix which can be plotted using histPlot:
+
+```{r, eval=FALSE}
+hist_cabs
+```
+
+
+FK Comment: I need to study the above plot and legend a lot more before I could say much about them. Does it mean that people are likely to cite both Mi 2017 and Huang 2015 together and then others would cite Rocco 2014 or Mgel 2018 in combo with one another. That there is clustering in terms of the co-occurrence of article citations in papers? I could we well wide of the mark here.
+
+## Thematic evolution as a function of Basel Accords
+
+Cobo, M. J., Lopez-Herrera, A. G., Herrera-Viedma, E., & Herrera, F. (2011). An approach for detecting, quantifying, and visualizing the evolution of a research field: A practical application to the fuzzy sets theory field. Journal of Informetrics, 5(1), 146-166.
+
+The following shows a evolution of the important themes in the CABS literature, split using key years in the Basel Accords.  Period 1999-2004 is Basel 1, Period 2004-2010 is Basel 2, and period 2010-2016 is Basel 3, while the final period can be thought of as Basel 3.5 or 4.
+
+
+```{r}
+themes
+```
+
+
+## Contemporary review of industry and academic literature of Value-at-Risk, AI and financial machine learning
+
+**further desktop exercise on the state of the art AI, machine learning, and high performance computing approaches to improve Value-at-Risk estimates**
+
+>Back to recommendations harvested from KTP App -edited slightly
+
+Add VaR Lit Review based recommendations to the below
+
+### Possible options and recommendations for Risk Analytics
+*What is the route to market?*
+Funds-Axis have a straightforward route to market through their existing client base and are already aware via customer feedback that demand for this new product exists. They can use that as their route to market for the solution that this Innovation Voucher will create.
+
+As they hold the client data already, and the demand is there from an estimated 50\% of their existing clients to apply VaR models to their portfolios, this will enable them to release a new premium bundled solution which incorporates VaR and Risk Analytical with immediate revenue returns.
+
+The product could be initially marketed to existing clients. This could be through in-app marketing to customers where they will see the new modules and be able to trial it and also through CRM engagement which will commence at the appropriate point during the project.
+
+Funds-Axis could then move to look at new clients, including:
+Through RFPs where they are responding to client requests for information, which almost invariably include a VaR component.
+Through proactive marketing and co-ordinated campaign management, coupled with a dedicated sales effort.
+
+\textbf{What are the likely impacts of the project?}\\
+The Funds-Axis revenue model is to charge on a per portfolio per module per annum basis, with all deals being recurring annual revenue.
+
+Within the current revenue, they have c.1,000 portfolios which subscribe to modules worth between £1,000 and £2,500 per fund.
+
+VaR (plus back testing and stress testing) is a bespoke premium solution that typically prices at c. £2,750 - £3,500 per portfolio per annum. This is the price at which they resell 3rd party solutions to those of customers who want us to provide it.
+
+Whilst, it is not Funds-Axis' plan to push for a really low cost solution, price disruption is an element of what they are hoping to achieve. They assume they can make a risk solution available at £1,250 per portfolio per annum and may be able to push closer to £2,250. The figures below are based on the simple assumption that they can charge c. £1,250 per investment portfolio.
+
+They have factored in the following costs, which are the expected incremental costs and are in line with requirements for the existing solution:
+
+Incremental headcount to increase by 2 a year to increasing to 10 over 5 years and with average salaries of £50k.
+Datacosts £25k per annum
+Technology infrastructure costs - £25k per annum
+Other costs i.e. marketing costs, sales, other business development costs, provision for legal costs for any IP protection, potential 3rd party review/audit of the calculations etc., rising from £50k to £250k over the 5 years
+A. Premium VaR Solution -- this service be charged at (assumption) £1.25k per investment portfolio
+
+During project: 0
+
+Yr 1: No of Portfolios 200, income of £250k, costs c. £200k, net profit is 20\% = £50k net profit
+
+Yr 2: No of Portfolios 400, income of £500k, costs c. £350k, net profit is 30\% = £150k net profit
+
+Yr 3: No of Portfolios 600, income of £750k, costs c. £500k, net profit is 33.3\% = £250k net profit
+
+Yr 4: No of Portfolios 800, income of £1m, costs c. £650k, net profit is 35\% = £350k net profit
+
+Yr 5: No of Portfolios 1000, income of £1.25m, costs c. £800k, net profit is 36\% = £450k net profit
+
+\textbf{What additional business actions and investments will be needed for you to achieve the business case, beyond those needed to deliver the work plan?}\\
+In order to bring this solution to market the company will commit to the following costs:
+
+Data costs: They will need to incur significant data costs, including during the build phase. We anticipate these costs to be approximately £75,000 over 3 years.
+Technology infrastructure costs will be in the region of £25k per annum.
+Staff costs: They will need to develop a dedicated risk team. It is the intention of the company to create two new technical roles in this area, this would be two experienced professionals with salaries of approximately £50,000 per annum. An incremental headcount to increase by 10 over 5 years and with average costs of £50,000 is to be factored in.
+Development costs: In order to develop the commercialised solution it is anticipated that the development costs will be in the region of £150k.
+Funds-Axis will also need to invest in marketing, business development and sales to ensure that their existing clients are aware of the new offering and that they can attract new clients. Provision for IP and audit/accreditation costs have also been considered.
+
+
+<!-- <!-- # References --> -->
+
+<!-- <!-- <div id="refs"></div> --> -->
+
+<!-- # Appendix -->
